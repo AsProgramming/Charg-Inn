@@ -93,9 +93,9 @@ public class AppDB extends SQLiteOpenHelper {
                     CHARGACTIF + " integer, " +
                     CHARGFAV + " integer)";
             default:
-                return "create table " + TABFAV + "(" + ID + " integer primary key autoincrement, " +
-                        CXID + " integer, " +
+                return "create table " + TABFAV + "(" + BORNEID + " integer primary key, " +
                         BORNEID + " integer)";
+
         }
     }
 
@@ -204,12 +204,6 @@ public class AppDB extends SQLiteOpenHelper {
     }
 
     private ArrayList<Borne> remplirFavoris(SQLiteDatabase db, ArrayList<Borne> lst, Client c) {
-//        String request = "SELECT * FROM " + TABHUB + " INNER JOIN " + TABFAV
-//                + " ON " + ID + " = " + BORNEID
-//                + " WHERE " + CXID + " = " +  c.getId();
-
-        //  String request = "select * from " + TABFAV + " where "+CXID+" = '"+ c.getId()+"'";
-       // Cursor data = db.rawQuery(request, null);
 
         String request = "SELECT * FROM borne a " +
                 "INNER JOIN favoris b ON a.id = b.borne_id WHERE b.cx_id=?";
@@ -328,12 +322,15 @@ public class AppDB extends SQLiteOpenHelper {
      * @param borne les nouveaux changements
      * @return si a ete changer
      */
-    public boolean ajusterBorne(Borne borne){
+    public boolean ajusterBorne(Borne borne, boolean etaitFavori){
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = genererValues(null, borne);
 
         db.update(TABHUB, values, ID +" =?", new String[]{borne.getId()});
+        if(etaitFavori){
+            envleverFavori(borne);
+        }
         db.close();
         return true;
     }
@@ -347,6 +344,13 @@ public class AppDB extends SQLiteOpenHelper {
     public boolean supprimerClient(String id){
         SQLiteDatabase db = getWritableDatabase();
         int rows = db.delete(TABCLIENT, ID + " =?", new String[]{id});
+        db.close();
+        return true;
+    }
+
+    public boolean envleverFavori(Borne infos){
+        SQLiteDatabase db = getWritableDatabase();
+        int rows = db.delete(TABFAV, ID + " =?", new String[]{infos.getId()});
         db.close();
         return true;
     }
