@@ -17,12 +17,17 @@ public class AppDB extends SQLiteOpenHelper {
     public static final String TAG = "Hello";
 
 
+
+    private  Context context;
     private static AppDB db = null;
     private static final String DBNAME = "charg_inn";
     private static final String TABCLIENT = "client";
     private static final String TABHUB = "borne";
+    private static final String TABFAV = "favoris";
 
     private static final String ID = "id";
+    private static final String CXID = "cx_id";
+    private static final String BORNEID = "borne_id";
 
     private static final String CLIENTNANE = "name";
     private static final String CLIENTMAX = "distanceMax";
@@ -50,12 +55,15 @@ public class AppDB extends SQLiteOpenHelper {
 
     private AppDB(Context mContext){
         super(mContext, DBNAME, null, 1);
+
+        context = mContext;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQLcreate(true));
-        db.execSQL(SQLcreate(false));
+        db.execSQL(SQLcreate(1));
+        db.execSQL(SQLcreate(2));
+        db.execSQL(SQLcreate(3));
     }
 
     @Override
@@ -64,25 +72,30 @@ public class AppDB extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    private String SQLcreate(boolean client){
-        if(client){
-            return "create table " + TABCLIENT + "(" + ID + " number primary key autoincrement, " +
+    private String SQLcreate(int indice){
+        switch(indice){
+            case 1:
+            return "create table " + TABCLIENT + "(" + ID + " integer primary key autoincrement, " +
                     CLIENTNANE + " text, " +
-                    CLIENTMAX + " number, " +
-                    CLIENTMIN + " number, " +
+                    CLIENTMAX + " integer, " +
+                    CLIENTMIN + " integer, " +
                     CLIENTEMAIL + " text, " +
                     CLIENTPSSWRD + " text, " +
-                    CLIENTNIVEAU + " number)";
-        }else{
-            return "create table " + TABHUB + "(" + ID + " number primary key autoincrement, " +
+                    CLIENTNIVEAU + " integer)";
+            case 2:
+            return "create table " + TABHUB + "(" + ID + " integer primary key autoincrement, " +
                     CHARGNAME + " text, " +
                     CHARGLONG + " real, " +
                     CHARGLAT + " real, " +
-                    CHARGMAX + " number, " +
-                    CHARGNB + " number, " +
-                    CHARGTEL + " number, " +
-                    CHARGACTIF + " number, " +
-                    CHARGFAV + " number)";
+                    CHARGMAX + " integer, " +
+                    CHARGNB + " integer, " +
+                    CHARGTEL + " text, " +
+                    CHARGACTIF + " integer, " +
+                    CHARGFAV + " integer)";
+            default:
+                return "create table " + TABFAV + "(" + ID + " integer primary key autoincrement, " +
+                        CXID + " integer, " +
+                        BORNEID + " integer)";
         }
     }
 
@@ -111,6 +124,16 @@ public class AppDB extends SQLiteOpenHelper {
 
         long id = db.insert(TABHUB, null, values);
         Log.d(TAG, "ajout Bornet: ");
+        db.close();
+    }
+
+    public void ajouterFavoris(Client c, Borne borne){
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CXID, c.getId());
+        values.put(BORNEID, borne.getId());
+        long id = db.insert(TABFAV, null, values);
+        Log.d(TAG, "ajout de favs: ");
         db.close();
     }
 
@@ -157,7 +180,7 @@ public class AppDB extends SQLiteOpenHelper {
     }
 
     /**
-     * Methode qui renvoi la liste de clients
+     * Methode qui renvoi la liste de bornes
      * @return liste de clients
      */
     public ArrayList<Borne> getBornes(){
@@ -167,6 +190,45 @@ public class AppDB extends SQLiteOpenHelper {
 
         lst = remplirListeBorne(db, lst);
 
+        return lst;
+    }
+
+    public ArrayList<Borne> getFavoris(Client c){
+        ArrayList<Borne> lst = new ArrayList<>();
+
+        SQLiteDatabase db = getWritableDatabase();//
+
+        lst = remplirFavoris(db, lst, c);
+
+        return lst;
+    }
+
+    private ArrayList<Borne> remplirFavoris(SQLiteDatabase db, ArrayList<Borne> lst, Client c) {
+//        String request = "SELECT * FROM " + TABHUB + " INNER JOIN " + TABFAV
+//                + " ON " + ID + " = " + BORNEID
+//                + " WHERE " + CXID + " = " +  c.getId();
+
+        //  String request = "select * from " + TABFAV + " where "+CXID+" = '"+ c.getId()+"'";
+       // Cursor data = db.rawQuery(request, null);
+
+        String request = "SELECT * FROM borne a " +
+                "INNER JOIN favoris b ON a.id = b.borne_id WHERE b.cx_id=?";
+
+        Cursor data = db.rawQuery(request, new String[]{c.getId()});
+        if (data.moveToFirst()){
+            do {
+                Borne b = new Borne(data.getInt(0),
+                        data.getString(1), data.getInt(4));
+                b.setLongitude(data.getFloat(2));
+                b.setLatitude(data.getFloat(3));
+                b.setTelephone(data.getString(6));
+                b.setActif(data.getInt(7));
+                b.setFavori(data.getInt(8));
+                lst.add(b);
+            } while(data.moveToNext());
+        }
+        data.close();
+        db.close();
         return lst;
     }
 
@@ -213,7 +275,29 @@ public class AppDB extends SQLiteOpenHelper {
                 borne.setLongitude(data.getFloat(2));
                 borne.setLatitude(data.getFloat(3));
                 borne.setNb(data.getInt(5));
-                borne.setTelephone(data.getInt(6));
+                borne.setTelephone(data.getString(6));
+                borne.setActif(data.getInt(7));
+                borne.setFavori(data.getInt(8));
+                lst.add(borne);
+            }while(data.moveToNext());
+        }
+        data.close();
+        db.close();
+        return lst;
+    }
+
+    private ArrayList<Borne> remplirListeFavoris(SQLiteDatabase db, ArrayList<Borne> lst) {
+        String request = "select * from " + TABHUB;
+        Cursor data = db.rawQuery(request, null);
+
+        if(data.moveToFirst()){
+            do{
+                Borne borne = new Borne(data.getInt(0),
+                        data.getString(1), data.getInt(4));
+                borne.setLongitude(data.getFloat(2));
+                borne.setLatitude(data.getFloat(3));
+                borne.setNb(data.getInt(5));
+                borne.setTelephone(data.getString(6));
                 borne.setActif(data.getInt(7));
                 borne.setFavori(data.getInt(8));
                 lst.add(borne);

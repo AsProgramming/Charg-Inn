@@ -13,6 +13,16 @@ public class Client {
 
     public Client(){ }
 
+    public Client(String email, String password, String nom, int distMax, int distMin, int niveau) {
+        this.email = email;
+        this.password = password;
+        this.nom = nom;
+        this.distMax = distMax;
+        this.distMin = distMin;
+        this.niveau = niveau;
+    }
+
+
     public Client(int Lid, String email, String password) {
         id = Lid;
         this.email = email;

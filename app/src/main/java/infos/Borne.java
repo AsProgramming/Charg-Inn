@@ -8,11 +8,22 @@ public class Borne {
     private float latitude;
     private int niveau;
     private int nb;
-    private int telephone;
+    private String telephone;
     private boolean actif;
     private boolean favori;
 
     public Borne(){ }
+
+    public Borne(String nom, float longitude, float latitude, int niveau, int nb, String telephone, boolean actif, boolean favori) {
+        this.nom = nom;
+        this.longitude = longitude;
+        this.latitude = latitude;
+        this.niveau = niveau;
+        this.nb = nb;
+        this.telephone = telephone;
+        this.actif = actif;
+        this.favori = favori;
+    }
 
     public Borne(int Lid, String leNom, int leNiveau){
         id = Lid;
@@ -40,7 +51,7 @@ public class Borne {
         this.nb = nb;
     }
 
-    public void setTelephone(int telephone) {
+    public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
 
@@ -77,7 +88,7 @@ public class Borne {
         return nb;
     }
 
-    public int getTelephone() {
+    public String getTelephone() {
         return telephone;
     }
 
