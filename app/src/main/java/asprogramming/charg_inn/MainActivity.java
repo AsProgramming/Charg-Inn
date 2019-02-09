@@ -23,9 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
         Client test = new Client("email", "password", "nom", 100, 80, 2);
         Borne borne = new Borne("nom", 15.5f, 15.5f, 3, 4, "5148225656", true, true);
-//
         db.ajouterClient(test);
-     //   db.ajouterBorne(borne);
+        db.ajouterBorne(borne);
 
 
         ArrayList<Borne> lst2 = db.getBornes();

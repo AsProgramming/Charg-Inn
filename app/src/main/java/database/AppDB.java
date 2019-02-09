@@ -94,8 +94,7 @@ public class AppDB extends SQLiteOpenHelper {
                     CHARGFAV + " integer)";
             default:
                 return "create table " + TABFAV + "(" + BORNEID + " integer primary key, " +
-                        BORNEID + " integer)";
-
+                        CXID + " integer)";
         }
     }
 

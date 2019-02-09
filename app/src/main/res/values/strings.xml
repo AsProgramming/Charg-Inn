@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Charg-Inn</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
