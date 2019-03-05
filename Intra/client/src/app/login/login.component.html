@@ -1,0 +1,14 @@
+<div class="alert alert-danger" *ngIf="serverErrorMsg" style="width: 500px; margin: auto">
+    <p style="text-align: center">{{serverErrorMsg.message}}</p>
+</div>
+  
+<div>
+  <form (ngSubmit) = "loginAttempt()" style="width: 500px; margin: auto">
+    <label for="username">Email</label>
+    <input type = "text" [(ngModel)] = "user.email" name="email" class="form-control">
+    <label for="password">Password</label>
+    <input type="password" [(ngModel)] = "user.password" name="password" id="password" class="form-control">
+    <button type="submit" class="btn btn-primary" style="width: 500px; margin-top: 10px">Login</button><br>
+    <a href="#" >Forgot password?</a>
+  </form>
+</div>
